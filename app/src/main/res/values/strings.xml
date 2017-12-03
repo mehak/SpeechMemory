@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SpeechMemory</string>
+    <string name="enter_check_text">Enter check to compare verbal input to</string>
+    <string name="start_recording">Record</string>
+    <string name="match_success">Good job!  It matches!</string>
+    <string name="match_failure">Does not match, try again</string>
+</resources>

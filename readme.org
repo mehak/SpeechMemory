@@ -1,0 +1,8 @@
+* SpeechMemory
+** Summary
+  Simple app to assist with memorizing stuff.  Type the master/source text
+  in the top window, press 'Record' and say the stuff you memorized.  If it
+  matches, a happy message will show.
+** TODOs
+*** TODO Fill the readme out more
+*** TODO Show where what was said deviates from what was written
