@@ -64,7 +64,10 @@ class MainActivity : AppCompatActivity() {
 
     private fun prepareMasterString(masterString: String): String {
         val removalRegex = "[^a-zA-Z0-9 ]".toRegex()
+        val removeMultipleSpaces = " {2,}".toRegex()
 
-        return masterString.replace(removalRegex, "")
+        val intermediateReplace = masterString.replace(removalRegex, " ")
+
+        return intermediateReplace.replace(removeMultipleSpaces, " ").trim(' ')
     }
 }
