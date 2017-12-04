@@ -4,7 +4,8 @@
   in the top window, press 'Record' and say the stuff you memorized.  If it
   matches, a happy message will show.
 ** TODOs
+  - [X] Show where what was said deviates from what was written
   - [ ] Fill the readme out more
-  - [ ] Show where what was said deviates from what was written
+  - [ ] Code cleanup
   - [ ] Add expanding sidebar
   - [ ] Add save/recall feature for things to memorize
