@@ -24,6 +24,7 @@ import android.text.Html.FROM_HTML_MODE_COMPACT
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import org.jetbrains.anko.longToast
+import uno.merlin.diffstring.DiffString
 
 class MainActivity : AppCompatActivity() {
     val SPEECH_REQUEST_CODE = 0
@@ -37,11 +38,15 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
             val results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             val spokenText = results[0].replace(".", " period").toLowerCase()
-
             val masterString = prepareMasterString(masterText.text.toString().toLowerCase())
-            println(masterString)
 
-            val markedUpText = compareText(masterString, spokenText)
+            // heavy lifting for comparison is done in DiffString
+            val diffedString = DiffString(masterString, spokenText)
+
+            val message = if (diffedString.isEqual) R.string.match_success else R.string.match_failure
+            longToast(message)
+
+            val markedUpText = diffedString.diffedDisciple()
             voiceTextView.text = Html.fromHtml(markedUpText, FROM_HTML_MODE_COMPACT)
         }
         super.onActivityResult(requestCode, resultCode, data)
@@ -61,19 +66,5 @@ class MainActivity : AppCompatActivity() {
         val removalRegex = "[^a-zA-Z0-9 ]".toRegex()
 
         return masterString.replace(removalRegex, "")
-    }
-
-    private fun compareText(masterString: String, testString: String): String {
-        val successMessage = R.string.match_success
-        val failMessage = R.string.match_failure
-        val message = if (masterString == testString) successMessage else failMessage
-
-        longToast(message)
-
-        /*
-         * TODO: Markup text_string using red to show errors
-         * TODO: Markup text_string green on success
-         */
-        return testString
     }
 }
