@@ -41,7 +41,7 @@ class DiffString(val masterString: String, val discipleString: String) {
         logger?.info("Started logger for $className")
         val initMessage = """
             uno.merlin.diffstring.DiffString initialized with the following values
-            masterString: $masterString
+            masterString:   $masterString
             discipleString: $discipleString
             """.trimIndent()
         logger?.info(initMessage)
@@ -53,6 +53,77 @@ class DiffString(val masterString: String, val discipleString: String) {
      */
     fun diffedDisciple(): String {
         // TODO: write functions for comparing
-        return discipleString
+        // TODO: refactor this later, seems like things should be split better
+        return compareMasterDisciple()
+    }
+
+    private fun compareMasterDisciple(): String {
+        // TODO: refactor with diffedDisciple, if possible
+        val successTag = "<font color=#00ff00>"
+        val failTag = "<font color=#ff0000>"
+        val endTag = "</font>"
+
+        var markedUpString = "$successTag$discipleString$endTag"
+        if (!isEqual) {
+            val masterTokens = masterString.split(" ")
+            val discipleTokens = discipleString.split(" ")
+
+            logger?.info(masterTokens.joinToString("@"))
+            logger?.info(discipleTokens.joinToString("@"))
+
+            val shortestSize = if (masterTokens.size >= discipleTokens.size)
+                discipleTokens.size
+            else
+                masterTokens.size
+
+            // TODO: refactor to make it default to not matching if the length matches
+            var matches = masterTokens.size == discipleTokens.size
+
+            // Log size information
+            val sizeInfo = """
+                masterTokensSize: ${masterTokens.size}
+                discipleTokensSize: ${discipleTokens.size}
+                shortestSize: $shortestSize
+                matches: $matches
+                """.trimIndent()
+            logger?.info(sizeInfo)
+
+            val taggedDiscipleStrings: MutableList<String> = mutableListOf()
+            for (index in 0..(shortestSize - 1)) {
+                val masterWord = masterTokens[index]
+                val discipleWord = discipleTokens[index]
+
+                var wordsEqual = false
+                if (masterWord == discipleWord) {
+                    taggedDiscipleStrings.add(discipleWord)
+                    wordsEqual = true
+                } else {
+                    taggedDiscipleStrings.add("$failTag$discipleWord$endTag")
+                    if (matches) matches = false
+                }
+
+                logger?.info("compared $masterWord to $discipleWord : $wordsEqual")
+            }
+
+            if (matches) {
+                // Simple string comparison was wrong, fix it
+                if (matches != isEqual) isEqual = matches
+                logger?.info("String matches, error in length reporting")
+            } else if (discipleTokens.size > shortestSize) {
+                val overflowFromDisciple = discipleTokens.subList(shortestSize, discipleTokens.size)
+
+                taggedDiscipleStrings.add(failTag)
+                taggedDiscipleStrings.addAll(overflowFromDisciple)
+                taggedDiscipleStrings.add(endTag)
+
+                logger?.info("String does not match and disciple is longer than master")
+            } else {
+                markedUpString = taggedDiscipleStrings.joinToString(" ")
+                logger?.info("String does not match and disciple is shorter than master")
+            }
+        }
+
+        logger?.info(markedUpString)
+        return markedUpString
     }
 }
