@@ -4,4 +4,5 @@
     <string name="start_recording">Record</string>
     <string name="match_success">Good job!  It matches!</string>
     <string name="match_failure">Does not match, try again</string>
+    <string name="cancelled_action">Action cancelled, no text received</string>
 </resources>

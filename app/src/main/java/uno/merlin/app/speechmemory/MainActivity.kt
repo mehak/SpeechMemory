@@ -34,20 +34,23 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == SPEECH_REQUEST_CODE && resultCode == RESULT_OK) {
-            val results = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
-            val spokenText = results[0].replace(".", " period").toLowerCase()
+            val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val spokenText = results?.get(0)?.replace(".", " period")?.toLowerCase()
             val masterString = prepareMasterString(masterText.text.toString().toLowerCase())
 
             // heavy lifting for comparison is done in DiffString
-            val diffedString = DiffString(masterString, spokenText)
+            val diffedString = DiffString(masterString, spokenText.toString())
 
             val message = if (diffedString.isEqual) R.string.match_success else R.string.match_failure
             longToast(message)
 
             val markedUpText = diffedString.diffedDisciple()
             voiceTextView.text = Html.fromHtml(markedUpText, FROM_HTML_MODE_COMPACT)
+        } else {
+            // Show error message in case result is not ok
+            longToast(R.string.cancelled_action)
         }
         super.onActivityResult(requestCode, resultCode, data)
     }
