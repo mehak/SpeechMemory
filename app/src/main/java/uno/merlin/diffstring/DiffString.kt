@@ -116,6 +116,7 @@ class DiffString(val masterString: String, val discipleString: String) {
                 taggedDiscipleStrings.addAll(overflowFromDisciple)
                 taggedDiscipleStrings.add(endTag)
 
+                markedUpString = taggedDiscipleStrings.joinToString(" ")
                 logger?.info("String does not match and disciple is longer than master")
             } else {
                 markedUpString = taggedDiscipleStrings.joinToString(" ")
