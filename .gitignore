@@ -25,6 +25,7 @@ proguard.cfg
 # Generated files
 bin/
 gen/
+app/release/*
 
 # Local configuration file (sdk path, etc)
 local.properties
