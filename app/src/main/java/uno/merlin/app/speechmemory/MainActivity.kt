@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
 
             val markedUpText = diffedString.diffedDisciple()
             voiceTextView.text = Html.fromHtml(markedUpText, FROM_HTML_MODE_COMPACT)
-        } else {
+        } else if (requestCode == SPEECH_REQUEST_CODE && resultCode != RESULT_OK){
             // Show error message in case result is not ok
             longToast(R.string.cancelled_action)
         }
