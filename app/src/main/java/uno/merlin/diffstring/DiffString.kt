@@ -30,7 +30,7 @@ import java.util.logging.Logger.getLogger
  * @constructor creates an object to compare master with disciple.
  */
 class DiffString(val masterString: String, val discipleString: String) {
-    var isEqual: Boolean = masterString == discipleString
+    val isEqual: Boolean = masterString == discipleString
 
     companion object {
         val className = DiffString::class.qualifiedName
@@ -48,16 +48,53 @@ class DiffString(val masterString: String, val discipleString: String) {
     }
 
     /**
+     * Internal class for holding a DiffWord.  Used to decouple match status and formated output
+     */
+    data class DiffWord(val master: String, val disciple: String, val match: Boolean)
+
+    /**
      * Marks up and returns the discipleString after comparison
      * @return the marked up discipleString
      */
     fun diffedDisciple(): String {
         // TODO: write functions for comparing
         // TODO: refactor this later, seems like things should be split better
-        return compareMasterDisciple()
+        return markUpMasterDisciple()
     }
 
-    private fun compareMasterDisciple(): String {
+    private fun diffedMasterDisciple(): Array<DiffWord?> {
+        val masterTokens = masterString.split(" ")
+        val discipleTokens = discipleString.split(" ")
+
+        logger?.info(masterTokens.joinToString("@"))
+        logger?.info(discipleTokens.joinToString("@"))
+
+        val shortestSize = if (masterTokens.size >= discipleTokens.size)
+            discipleTokens.size
+        else
+            masterTokens.size
+
+        // Log size information
+        val sizeInfo = """
+                masterTokensSize: ${masterTokens.size}
+                discipleTokensSize: ${discipleTokens.size}
+                shortestSize: $shortestSize
+                """.trimIndent()
+        logger?.info(sizeInfo)
+
+        val diffWords = arrayOfNulls<DiffWord>(shortestSize)
+
+        for (index in 0..(shortestSize - 1)) {
+            val masterWord = masterTokens[index]
+            val discipleWord = discipleTokens[index]
+            val match = masterWord == discipleWord
+            diffWords[index] = DiffWord(masterWord, discipleWord, match)
+        }
+
+        return diffWords
+    }
+
+    private fun markUpMasterDisciple(): String {
         // TODO: refactor with diffedDisciple, if possible
         val successTag = "<font color=#00ff00>"
         val failTag = "<font color=#ff0000>"
@@ -65,52 +102,25 @@ class DiffString(val masterString: String, val discipleString: String) {
 
         var markedUpString = "$successTag$discipleString$endTag"
         if (!isEqual) {
-            val masterTokens = masterString.split(" ")
-            val discipleTokens = discipleString.split(" ")
-
-            logger?.info(masterTokens.joinToString("@"))
-            logger?.info(discipleTokens.joinToString("@"))
-
-            val shortestSize = if (masterTokens.size >= discipleTokens.size)
-                discipleTokens.size
-            else
-                masterTokens.size
-
-            // TODO: refactor to make it default to not matching if the length matches
-            var matches = masterTokens.size == discipleTokens.size
-
-            // Log size information
-            val sizeInfo = """
-                masterTokensSize: ${masterTokens.size}
-                discipleTokensSize: ${discipleTokens.size}
-                shortestSize: $shortestSize
-                matches: $matches
-                """.trimIndent()
-            logger?.info(sizeInfo)
+            val diffedStrings = diffedMasterDisciple()
 
             val taggedDiscipleStrings: MutableList<String> = mutableListOf()
-            for (index in 0..(shortestSize - 1)) {
-                val masterWord = masterTokens[index]
-                val discipleWord = discipleTokens[index]
+            for (diffWord in diffedStrings) {
+                val discipleWord = diffWord?.disciple
+                val match = diffWord?.match
 
-                var wordsEqual = false
-                if (masterWord == discipleWord) {
-                    taggedDiscipleStrings.add(discipleWord)
-                    wordsEqual = true
-                } else {
-                    taggedDiscipleStrings.add("$failTag$discipleWord$endTag")
-                    if (matches) matches = false
-                }
+                val addedDiscipleString = if (match == true) discipleWord
+                else
+                    "$failTag$discipleWord$endTag"
 
-                logger?.info("compared $masterWord to $discipleWord : $wordsEqual")
+                taggedDiscipleStrings.add(addedDiscipleString.toString())
+
+                logger?.info("compared ${diffWord?.master} to $discipleWord : $match")
             }
 
-            if (matches) {
-                // Simple string comparison was wrong, fix it
-                if (matches != isEqual) isEqual = matches
-                logger?.info("String matches, error in length reporting")
-            } else if (discipleTokens.size > shortestSize) {
-                val overflowFromDisciple = discipleTokens.subList(shortestSize, discipleTokens.size)
+            val discipleTokens = discipleString.split(" ")
+            if (discipleTokens.size > diffedStrings.size) {
+                val overflowFromDisciple = discipleTokens.subList(diffedStrings.size, discipleTokens.size)
 
                 taggedDiscipleStrings.add(failTag)
                 taggedDiscipleStrings.addAll(overflowFromDisciple)
